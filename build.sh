@@ -17,73 +17,78 @@ mkdir -p ${DEPS_SOURCE} ${DEPS_PREFIX} ${FLAG_DIR}
 cd ${DEPS_SOURCE}
 
 # protobuf
-if [ ! -f "${FLAG_DIR}/protobuf_2_6_1" ] \
+if [ ! -f "${FLAG_DIR}/protobuf" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/libprotobuf.a" ] \
     || [ ! -d "${DEPS_PREFIX}/include/google/protobuf" ]; then
-    cd protobuf-2.6.1
+    git clone https://github.com/protocolbuffers/protobuf.git
+    cd protobuf
+    git checkout v3.6.1
+    git checkout -b 3_6_1
     autoreconf -ivf
     ./configure ${DEPS_CONFIG}
-    make -j4
+    make -j8
     make install
     cd -
-    touch "${FLAG_DIR}/protobuf_2_6_1"
-fi
-
-# cmake for gflags
-if ! which cmake ; then
-    cd CMake-3.2.1
-    ./configure --prefix=${DEPS_PREFIX}
-    make -j4
-    make install
-    cd -
+    touch8 "${FLAG_DIR}/protobuf"
 fi
 
 # gflags
-if [ ! -f "${FLAG_DIR}/gflags_2_1_1" ] \
+if [ ! -f "${FLAG_DIR}/gflags" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/libgflags.a" ] \
     || [ ! -d "${DEPS_PREFIX}/include/gflags" ]; then
-    cd gflags-2.1.1
+    git clone https://github.com/gflags/gflags.git
+    cd gflags
+    git checkout v2.2.1
+    git checkout -b 2_2_1
     cmake -DCMAKE_INSTALL_PREFIX=${DEPS_PREFIX} -DGFLAGS_NAMESPACE=google -DCMAKE_CXX_FLAGS=-fPIC
-    make -j4
+    make -j8
     make install
     cd -
-    touch "${FLAG_DIR}/gflags_2_1_1"
+    touch "${FLAG_DIR}/gflags"
 fi
 
+# grpc
+if [ ! -f "${FLAG_DIR}/grpc" ]; then
+    git clone https://github.com/grpc/grpc.git
+    cd grpc
+    git checkout v1.15.0
+    git checkout -b 1_15_0
+    git submodule update --init
+    make -j8
+    cd -1
+    touch "${FLAG_DIR}/grpc"
+fi
+exit -1
+
 # gtest
-if [ ! -f "${FLAG_DIR}/gtest_1_7_0" ] \
+if [ ! -f "${FLAG_DIR}/gtest" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/libgtest.a" ] \
     || [ ! -d "${DEPS_PREFIX}/include/gtest" ]; then
-    cd gtest-1.7.0
+    git clone https://github.com/google/googletest.git
+    cd googletest
+    git checkout release-1.8.1
+    git checkout -b 1_8_1
     ./configure ${DEPS_CONFIG}
-    make
+    make -j8
     cp -a lib/.libs/* ${DEPS_PREFIX}/lib
     cp -a include/gtest ${DEPS_PREFIX}/include
     cd -
-    touch "${FLAG_DIR}/gtest_1_7_0"
+    touch "${FLAG_DIR}/gtest"
 fi
 
-# libunwind for gperftools
-if [ ! -f "${FLAG_DIR}/libunwind_0_99" ] \
-    || [ ! -f "${DEPS_PREFIX}/lib/libunwind.a" ] \
-    || [ ! -f "${DEPS_PREFIX}/include/libunwind.h" ]; then
-    cd libunwind-0.99
-    ./configure ${DEPS_CONFIG}
-    make CFLAGS=-fPIC -j4
-    make CFLAGS=-fPIC install
+# rocksdb
+if [ ! -f "${FLAG_DIR}/ro8cksdb" ] \
+    || [ ! -f "${DEPS_PREFIX}/lib/librocksdb.a" ] \
+    || [ ! -d "${DEPS_PREFIX}/include/rocksdb" ]; then
+    git clone https://gi8thub.com/facebook/rocksdb.git
+    git checkout v5.15.10
+    git checkout -b 5_15_10
+    make shared_lib -j8
+    cp -a librocksdb.so.5.15.10 ${DEPS_PREFIX}/lib/librocksdb.so
+    cp -a include/rocksdb ${DEPS_PREFIX}/include
     cd -
-    touch "${FLAG_DIR}/libunwind_0_99"
+    touch "${FLAG_DIR}/rocksdb"
 fi
-
-$CXX --std=c++11 -x c++ - -o teststd.out 2>/dev/null <<EOF
-int main() {}
-EOF
-
-if [ "$?" = 0 ]; then
-    STD_FLAG=c++11
-fi
-rm -rf teststd.out
-set -e
 
 cd ${WORK_DIR}
 
