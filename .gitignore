@@ -1,0 +1,23 @@
+# Compiled Object files
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Proto .h .cc
+*.pb.cc
+*.pb.h
+
+#depends
+depends.mk
+*_test
+thirdsrc
+thirdparty
+output
+.build
