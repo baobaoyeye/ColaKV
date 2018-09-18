@@ -58,29 +58,29 @@ if [ ! -f "${FLAG_DIR}/grpc" ]; then
     cd -1
     touch "${FLAG_DIR}/grpc"
 fi
-exit -1
 
 # gtest
-if [ ! -f "${FLAG_DIR}/gtest" ] \
-    || [ ! -f "${DEPS_PREFIX}/lib/libgtest.a" ] \
-    || [ ! -d "${DEPS_PREFIX}/include/gtest" ]; then
+if [ ! -f "${FLAG_DIR}/gtest" ]; then
     git clone https://github.com/google/googletest.git
     cd googletest
     git checkout release-1.8.1
     git checkout -b 1_8_1
+    autoreconf -ivf
     ./configure ${DEPS_CONFIG}
     make -j8
-    cp -a lib/.libs/* ${DEPS_PREFIX}/lib
-    cp -a include/gtest ${DEPS_PREFIX}/include
+    cp -a googletest/lib/* ${DEPS_PREFIX}/lib
+    cp -a googlemock/lib/* ${DEPS_PREFIX}/lib
+    cp -a googletest/include/gtest ${DEPS_PREFIX}/include
+    cp -a googlemock/include/gmock ${DEPS_PREFIX}/include
     cd -
     touch "${FLAG_DIR}/gtest"
 fi
 
 # rocksdb
-if [ ! -f "${FLAG_DIR}/ro8cksdb" ] \
+if [ ! -f "${FLAG_DIR}/rocksdb" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/librocksdb.a" ] \
     || [ ! -d "${DEPS_PREFIX}/include/rocksdb" ]; then
-    git clone https://gi8thub.com/facebook/rocksdb.git
+    git clone https://github.com/facebook/rocksdb.git
     git checkout v5.15.10
     git checkout -b 5_15_10
     make shared_lib -j8
@@ -99,7 +99,7 @@ cd ${WORK_DIR}
 echo "PROTOBUF_PATH=./thirdparty" >> depends.mk
 echo "PROTOC_PATH=./thirdparty/bin/" >> depends.mk
 echo 'PROTOC=$(PROTOC_PATH)protoc' >> depends.mk
-echo "BRPC_PATH=./thirdparty" >> depends.mk
+echo "GRPC_PATH=./thirdparty" >> depends.mk
 echo "GFLAG_PATH=./thirdparty" >> depends.mk
 echo "GTEST_PATH=./thirdparty" >> depends.mk
 
