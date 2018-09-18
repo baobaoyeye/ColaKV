@@ -29,7 +29,7 @@ if [ ! -f "${FLAG_DIR}/protobuf" ] \
     make -j8
     make install
     cd -
-    touch8 "${FLAG_DIR}/protobuf"
+    touch "${FLAG_DIR}/protobuf"
 fi
 
 # gflags
@@ -55,7 +55,7 @@ if [ ! -f "${FLAG_DIR}/grpc" ]; then
     git checkout -b 1_15_0
     git submodule update --init
     make -j8
-    cd -1
+    cd -
     touch "${FLAG_DIR}/grpc"
 fi
 
@@ -81,8 +81,7 @@ if [ ! -f "${FLAG_DIR}/rocksdb" ] \
     || [ ! -f "${DEPS_PREFIX}/lib/librocksdb.a" ] \
     || [ ! -d "${DEPS_PREFIX}/include/rocksdb" ]; then
     git clone https://github.com/facebook/rocksdb.git
-    git checkout v5.15.10
-    git checkout -b 5_15_10
+    git checkout -b 5_15_10 v5.15.10
     make shared_lib -j8
     cp -a librocksdb.so.5.15.10 ${DEPS_PREFIX}/lib/librocksdb.so
     cp -a include/rocksdb ${DEPS_PREFIX}/include

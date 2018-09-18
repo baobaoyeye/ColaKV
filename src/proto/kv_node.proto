@@ -1,0 +1,97 @@
+syntax = "proto3";
+
+package colakv.kv_node;
+
+enum StatusCode {
+    kOk = 0;
+    kNotFound = 1;
+    kInvlidParams = 2;
+    kBusy = 3;
+    kNotReady = 4;
+}
+
+enum UpdateType {
+    kPut = 0;
+    kDelete = 1;
+}
+
+enum ValueType {
+    kPlaceholder = 0;
+    kBinary      = 1;
+    kString      = 2;
+    kInt32       = 3;
+    kInt64       = 4;
+    kDouble      = 5;
+    // may be add complex type [array|map|set] and so on
+}
+
+message Key {
+    bytes data; 
+}
+
+message Value {
+    ValueType type;
+    bytes data;
+    int64 version; // now only support one version for same key
+}
+
+message UpdateItems {
+    repeated UpdateType;
+    repeated Key;
+    repeated Value;
+}
+
+message Results {
+    repeated StatusCode status;
+    repeated Key key;
+    repeated Value value;
+}
+
+message ScanResults {
+    repeated Key key;
+    repeated Value value;
+}
+
+message UpdateRequest {
+    int64 seq_id;
+    int64 req_timeout;
+    UpdateItems items;
+}
+
+message UpdateReply {
+    int64 seq_id;
+    Results results; 
+}
+
+message GetRequest {
+    int64 seq_id;
+    int64 req_timeout;
+    repeated Key;
+}
+
+message GetReply {
+    int64 seq_id;
+    Results results; 
+}
+
+message ScanRequest {
+    int64 seq_id;
+    int64 req_timeout;
+    int64 buffer_size;
+    Key start_key;
+    int64 results_length;
+}
+
+message ScanReply {
+    int64 seq_id;
+    StatusCode status;
+    ScanResults results; 
+}
+
+// The kvNode service definition.
+service KvNode {
+  rpc Update (UpdateRequest) returns (UpdateReply) {}
+  rpc Get (GetRequest) returns (GetReply) {}
+  rpc Scan (ScanRequest) returns (ScanReply) {}
+}
+
